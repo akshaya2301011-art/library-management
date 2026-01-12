@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Management System</title>
+</head>
+<body>
+    <h1>Library Management System</h1>
+
+    <input type="text" id="bookName" placeholder="Enter book name" />
+    <button onclick="addBook()">Add Book</button>
+
+    <h2>Books List</h2>
+    <ul id="booksList"></ul>
+
+    <script>
+        const API_URL = "http://localhost:3000";
+
+        // Load all books
+        async function loadBooks() {
+            const response = await fetch(`${API_URL}/books`);
+            const books = await response.json();
+            const list = document.getElementById("booksList");
+            list.innerHTML = '';
+
+            books.forEach(book => {
+                const li = document.createElement("li");
+                li.textContent = book.name;
+
+                // Add delete button
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "Delete";
+                deleteBtn.style.marginLeft = "10px";
+                deleteBtn.onclick = () => deleteBook(book._id);
+
+                li.appendChild(deleteBtn);
+                list.appendChild(li);
+            });
+        }
+
+        // Add a new book
+        async function addBook() {
+            const bookName = document.getElementById("bookName").value;
+            if (!bookName) return alert("Enter a book name");
+
+            await fetch(`${API_URL}/add-book`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: bookName })
+            });
+
+            document.getElementById("bookName").value = "";
+            loadBooks();
+        }
+
+        // Delete a book
+        async function deleteBook(id) {
+            await fetch(`${API_URL}/delete-book/${id}`, { method: "DELETE" });
+            loadBooks();
+        }
+
+        // Load books on page load
+        loadBooks();
+    </script>
+</body>
+</html>
+
